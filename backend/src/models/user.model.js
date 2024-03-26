@@ -60,16 +60,22 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-userSchema.methods.comparePasswords = async function (password) {
+userSchema.methods.comparePassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-userSchema.methods.generateAccessToken =function(){
-   return jwt.sign({id:this.regno}, process.env.JWT_SECRET, {expiresIn: process.env.ACCESS_TOKEN_EXIPIRY});
+userSchema.methods.generateAccessToken =async function(){
+   return jwt.sign({id:this.regno}, process.env.JWT_SECRET, {expiresIn: process.env.ACCESS_TOKEN_EXPIRY});
 }
 
-userSchema.methods.generateRefreshToken = function(){
-    return jwt.sign({id:this.regno}, process.env.REFRESH_TOKEN_SECRET, {expiresIn: process.env.REFRESH_TOKEN_EXIPIRY});
+userSchema.methods.generateRefreshToken = async function(){
+    return jwt.sign({id:this.regno}, process.env.JWT_SECRET, {expiresIn: process.env.REFRESH_TOKEN_EXPIRY});
+}
+
+userSchema.methods.generateAccessAndRefreshToken =async function(){
+  const accessToken = await this.generateAccessToken();
+  const refreshToken = await this.generateRefreshToken();
+  return {accessToken, refreshToken};
 }
 
 const User = mongoose.model("User", userSchema);

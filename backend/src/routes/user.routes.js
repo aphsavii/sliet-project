@@ -1,6 +1,10 @@
 import { Router } from "express";
 import { upload } from "../middlewares/upload.middleware.js";
-import { registerUser } from "../controllers/user.controller.js";
+import { registerUser,
+         loginUser,
+         generateOTP,
+         logoutUser,
+} from "../controllers/user.controller.js";
 
 const userRouter = Router();
 
@@ -15,5 +19,10 @@ userRouter.route('/register').post(
         maxCount: 1
     }
 ]),registerUser);
+
+userRouter.route('/generateOTP').post(generateOTP);
+userRouter.route('/login').post(loginUser);
+userRouter.route('/logout').post(logoutUser);
+
 
 export {userRouter}
