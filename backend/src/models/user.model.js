@@ -47,7 +47,7 @@ const userSchema = new mongoose.Schema(
     refreshToken: {
       type: String,
     },
-    avatar:{
+    avatarUrl:{
       type:String,
     }
   },
@@ -65,11 +65,11 @@ userSchema.methods.comparePassword = async function (password) {
 };
 
 userSchema.methods.generateAccessToken =async function(){
-   return jwt.sign({id:this.regno}, process.env.JWT_SECRET, {expiresIn: process.env.ACCESS_TOKEN_EXPIRY});
+   return jwt.sign({_id:this._id}, process.env.JWT_SECRET, {expiresIn: process.env.ACCESS_TOKEN_EXPIRY});
 }
 
 userSchema.methods.generateRefreshToken = async function(){
-    return jwt.sign({id:this.regno}, process.env.JWT_SECRET, {expiresIn: process.env.REFRESH_TOKEN_EXPIRY});
+    return jwt.sign({_id:this._id}, process.env.JWT_SECRET, {expiresIn: process.env.REFRESH_TOKEN_EXPIRY});
 }
 
 userSchema.methods.generateAccessAndRefreshToken =async function(){

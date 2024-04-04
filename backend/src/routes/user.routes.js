@@ -4,6 +4,7 @@ import { registerUser,
          loginUser,
          generateOTP,
          logoutUser,
+         refreshTokenToAccessToken
 } from "../controllers/user.controller.js";
 
 const userRouter = Router();
@@ -13,16 +14,12 @@ userRouter.route('/register').post(
     {
         name: "avatar",
         maxCount: 1
-    }, 
-    {
-        name: "coverImage",
-        maxCount: 1
     }
 ]),registerUser);
 
-userRouter.route('/generateOTP').post(generateOTP);
+userRouter.route('/generate-otp').post(generateOTP);
 userRouter.route('/login').post(loginUser);
 userRouter.route('/logout').post(logoutUser);
-
+userRouter.route('/refreshToken').post(refreshTokenToAccessToken);
 
 export {userRouter}

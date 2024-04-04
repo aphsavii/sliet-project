@@ -14,9 +14,23 @@ async function uploadOnCloudinary(localFilePath,folderPath){
     fs.unlinkSync(localFilePath); 
     return result.url;
   } catch (error) {
+    console.log(error);
     fs.unlinkSync(localFilePath);
     return null;
   }
 }
 
-export {uploadOnCloudinary};
+async function deleteFromCloudinary(publicUrl){
+  const publicId = publicUrl.split("/").slice(-2)[0].split(".")[0]+"/"+publicUrl.split("/").slice(-1)[0].split(".")[0];
+  try {
+    if (!publicId)   return null;
+    const result = await cloudinary.uploader.destroy(publicId);
+    return result;
+  } catch (error) {
+    console.log(error);
+    return null;
+  }
+}
+
+
+export {uploadOnCloudinary,deleteFromCloudinary};

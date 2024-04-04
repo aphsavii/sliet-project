@@ -1,4 +1,4 @@
-const DEFAULT_AVATAR = "https://res.cloudinary.com/dejbo7uw5/image/upload/v1710239207/avatar/a8bqciw2nf5debbtnfft.jpg";
+const DEFAULT_AVATAR = "https://res.cloudinary.com/dejbo7uw5/image/upload/v1711738910/avatar/ayl1ptnlmgi43ymkipv6.jpg";
 
 
 

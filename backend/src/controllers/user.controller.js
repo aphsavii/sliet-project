@@ -6,6 +6,7 @@ import { DEFAULT_AVATAR } from "../constants.js";
 import { uploadOnCloudinary } from "../utils/uploadOnCloudinary.js";
 import { redisClient, verifyOTP } from "../connections/redisConnect.js";
 import { sendMail } from "../utils/sendMail.js";
+import jwt from "jsonwebtoken";
 
 // REGISTER USER CONTROLLER
 const registerUser = asyncHandler(async (req, res, next) => {
@@ -21,7 +22,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
   const { regno, email, fullName, programme, batch, trade, password, otp } = req.body;
 
   if (
-    [regno, email, fullName, programme, batch, trade, password].some(
+    [regno, email, fullName, programme, batch, trade, password,otp].some(
       (field) => {
         let temp = field ?? "";
         return temp === "";
@@ -32,7 +33,7 @@ const registerUser = asyncHandler(async (req, res, next) => {
       .status(400)
       .json(
         new ApiError(
-          "regno, email, fullName, programme, batch, trade,password are mandatory",
+          "regno, email, fullName, programme, batch, trade,password, otp are mandatory",
           400
         )
       );
@@ -82,9 +83,9 @@ const registerUser = asyncHandler(async (req, res, next) => {
   });
 
   if (!user)
-    return new ApiError("Internal Server Error", 500, [
+    return  res.status(500).json(new ApiError("Internal Server Error", 500, [
       "Somethig went wrong while registering user",
-    ]);
+    ]));
   const createdUser = await User.findById(user._id).select(
     "-password -refreshToken"
   );
@@ -183,6 +184,8 @@ const AccessTokenoptions = {
 }
 
 const loggedInUser = await User.findById(user._id).select("-password -refreshToken");
+loggedInUser.refreshToken = refreshToken;
+await loggedInUser.save({validateBeforeSave:false});
 
 res.status(200).cookie("accessToken",accessToken,AccessTokenoptions).cookie("refreshToken",refreshToken,RefresTokenoptions).json(new ApiResponse(200,"Login Successfull",{loggedInUser,accessToken,refreshToken}));
 
@@ -217,4 +220,50 @@ const logoutUser = asyncHandler(async (req,res) => {
     .json(new ApiResponse(200,"User logged Out",[]));
 
 })
-export { registerUser, generateOTP, loginUser, logoutUser };
+
+// REFRESH TOKEN
+const refreshTokenToAccessToken = asyncHandler(async (req,res) => {
+
+  // get refresh token from frontend
+  // check for empty fields
+  // check if user exists
+  // compare refresh token
+  // generate jwt tokenimport {cook}
+
+  // save refresh token in db
+  // send jwt token and refresh token in response
+
+  const incomingRefreshToken = req?.cookies?.refreshToken || req.header("Authorization").replace("Bearer ","");
+  if(!incomingRefreshToken) return res.status(400).json(new ApiError("Refresh Token is mandatory",400));
+
+  const userId = jwt.verify(incomingRefreshToken,process.env.JWT_SECRET)._id;
+  const user = await User.findById(userId);
+
+  if(!user) return res.status(401).json(new ApiError("User not found",401));
+
+  if(user.refreshToken !== incomingRefreshToken) return res.status(401).json(new ApiError("Invalid Refresh Token",401));
+
+  const {accessToken, refreshToken} = await user.generateAccessAndRefreshToken();
+
+  user.refreshToken = refreshToken;
+  await user.save({validateBeforeSave:false});
+
+  const AccessTokenoptions = {
+    httpOnly:true,
+    secure:true,
+    maxAge: 2*60*60*1000,  // 2 hours
+  }
+
+  const RefresTokenoptions = {
+    httpOnly:true,
+    secure:true,
+    maxAge: 10*24*60*60*1000,  // 10 days
+  }
+
+  res.status(200).cookie("accessToken",accessToken,AccessTokenoptions).cookie("refreshToken",refreshToken,RefresTokenoptions).json(new ApiResponse(200,"Token Refreshed successfully",{accessToken,refreshToken}));
+
+
+});
+
+
+export { registerUser, generateOTP, loginUser, logoutUser, refreshTokenToAccessToken};

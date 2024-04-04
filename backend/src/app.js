@@ -14,11 +14,14 @@ app.use(cors({origin:process.env.CORS_ORIGIN}));
 
 // Routes import
 import {userRouter} from './routes/user.routes.js';
+import {qsRouter} from './routes/qs.routes.js';
 
-// Routes
-app.use('/user', userRouter);
+
 app.get('/',(req,res)=>{
     res.send('hello world!!')
 })
+// Routes
+app.use('/user', userRouter);
+app.use('/qs', qsRouter);
 
 export {app};

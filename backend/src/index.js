@@ -8,3 +8,4 @@ dbConnect().then(() => {
     );
   })
   .catch((err) => console.log("connection failed", err?.message));
+ 
